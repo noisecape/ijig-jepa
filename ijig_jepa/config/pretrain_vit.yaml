@@ -1,0 +1,31 @@
+# yaml file to define experiments
+experiment:
+  exp_name: exp1
+  exp_parent_folder: ijig_jepa\experiments
+  save_every: 1
+model:
+  model_name: vit-base
+  in_channels: 3
+  patch_size: 16
+  emb_size: 384
+  img_size: 224
+  depth: 12
+  out_dim: 384
+  shuffle_patches: True
+  drop_p: 0.
+  forward_expansion: 4
+  mask: None
+  num_heads: 8
+  dropout: 0.
+  forward_drop_p: 0.
+optimization:
+  epoch: 10
+  lr: 5e-3
+  device: cuda
+  use_bf16: True
+  momentum: 0.996
+dataset:
+  dataset_name: flickr30k
+  batch_size: 1
+  num_workers: 3
+  pin_memory: True

@@ -15,17 +15,17 @@ from torchvision.transforms import Compose, Resize, ToTensor
 
 class PatchEmbedding(nn.Module):
 
-    def __init__(self, in_channels:int = 3, patch_size:int= 16, emb_size:int=768, shuffle:bool=True):
+    def __init__(self, in_channels:int = 3, patch_size:int= 16, emb_size:int=768, shuffle_patches:bool=True):
         super(PatchEmbedding, self).__init__()
         self.patch_size = patch_size
-        self.shuffle = shuffle
+        self.shuffle_patches = shuffle_patches
         self.projections = nn.Sequential(
             nn.Conv2d(in_channels, emb_size, kernel_size=patch_size, stride=patch_size),
             Rearrange('b e (h) (w) -> b (h w) e')
         )
         self.cls_token = nn.Parameter(torch.randn(1,1, emb_size))
         num_positions = int(((224*224) / (patch_size*patch_size)) + 1)
-        self.pos_embeddings = self.create_pos_embeddings(num_positions=num_positions, emb_size=emb_size)
+        self.pos_embeddings = nn.Parameter(self.create_pos_embeddings(num_positions=num_positions, emb_size=emb_size))
 
     def create_pos_embeddings(self, num_positions, emb_size):
         pos_encoding = torch.zeros(num_positions, emb_size)
@@ -42,7 +42,7 @@ class PatchEmbedding(nn.Module):
         
         return pos_encoding
     
-    def shuffle_patches(self, x:torch.Tensor):
+    def apply_shuffle(self, x:torch.Tensor):
         batch_size, n_patches, _ = x.shape
         permutation = torch.randperm(n_patches)
         x_shuffled = x.clone()
@@ -53,8 +53,8 @@ class PatchEmbedding(nn.Module):
     def forward(self, x):
         b, _, _, _ = x.shape
         x = self.projections(x)
-        if self.shuffle:
-            x = self.shuffle_patches(x)
+        if self.shuffle_patches:
+            x = self.apply_shuffle(x)
         cls_token = repeat(self.cls_token, '() n e -> b n e', b=b)
         x = torch.cat([cls_token, x], dim=1)
         x += self.pos_embeddings
@@ -63,7 +63,7 @@ class PatchEmbedding(nn.Module):
 
 class MultiHeadAttention(nn.Module):
 
-    def __init__(self, emb_size:int=768, num_heads:int=8, dropout:float=0):
+    def __init__(self, emb_size:int=768, num_heads:int=8, dropout:float=0, **kwargs):
         super(MultiHeadAttention, self).__init__()
         self.emb_size = emb_size
         self.num_heads = num_heads
@@ -160,7 +160,7 @@ class ViT(nn.Sequential):
                  emb_size:int=768,
                  img_size:int=224,
                  depth:int=12,
-                 out_dim:int=192,
+                 out_dim:int=384,
                  **kwargs
                 ):
         super(ViT, self).__init__(
@@ -170,4 +170,4 @@ class ViT(nn.Sequential):
         )
                  
 
-summary(ViT(), (3, 224, 224), device='cpu')
+# summary(ViT(), (3, 224, 224), device='cpu')

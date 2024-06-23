@@ -24,7 +24,7 @@ class Flickr30k(Dataset):
         df.reset_index(drop=True, inplace=True)
         return df
 
-    def len(self):
+    def __len__(self):
         return self.df.shape[0]
 
     def __getitem__(self, index:int):
