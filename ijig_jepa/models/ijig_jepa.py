@@ -31,6 +31,7 @@ class IJigJepa(nn.Module):
         )
 
         self.target_encoder = copy.deepcopy(self.context_encoder)
+        # TODO: shuffle is true for both. It needs to be false for target_encoder
         
         for p in self.target_encoder.parameters():
             p.requires_grad=False
