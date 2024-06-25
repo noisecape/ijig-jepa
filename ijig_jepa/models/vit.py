@@ -24,10 +24,16 @@ class PatchEmbedding(nn.Module):
             Rearrange('b e (h) (w) -> b (h w) e')
         )
         self.cls_token = nn.Parameter(torch.randn(1,1, emb_size))
-        num_positions = int(((img_size*img_size) / (patch_size*patch_size)) + 1)
-        self.pos_embeddings = nn.Parameter(self.create_pos_embeddings(num_positions=num_positions, emb_size=emb_size))
+        # num_positions = int(((img_size*img_size) / (patch_size*patch_size)) + 1)
+        self.pos_embeddings = nn.Parameter(self.create_pos_embeddings_fixed(img_size, patch_size, emb_size))
 
-    def create_pos_embeddings(self, num_positions, emb_size):
+
+    def create_pos_embeddings_fixed(self,img_size, patch_size, emb_size):
+        positions = nn.Parameter(torch.randn((img_size // patch_size) **2 + 1, emb_size))
+        positions = positions.unsqueeze(0)
+        return positions
+
+    def create_pos_embeddings_sin_cos(self, num_positions, emb_size):
         pos_encoding = torch.zeros(num_positions, emb_size)
 
         position = torch.arange(0, num_positions, dtype=torch.float).unsqueeze(1)
