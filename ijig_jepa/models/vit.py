@@ -15,7 +15,7 @@ from torchvision.transforms import Compose, Resize, ToTensor
 
 class PatchEmbedding(nn.Module):
 
-    def __init__(self, in_channels:int = 3, patch_size:int= 16, emb_size:int=768, shuffle_patches:bool=True):
+    def __init__(self, in_channels:int = 3, patch_size:int= 16, emb_size:int=768, img_size:int=224, shuffle_patches:bool=True):
         super(PatchEmbedding, self).__init__()
         self.patch_size = patch_size
         self.shuffle_patches = shuffle_patches
@@ -24,7 +24,7 @@ class PatchEmbedding(nn.Module):
             Rearrange('b e (h) (w) -> b (h w) e')
         )
         self.cls_token = nn.Parameter(torch.randn(1,1, emb_size))
-        num_positions = int(((224*224) / (patch_size*patch_size)) + 1)
+        num_positions = int(((img_size*img_size) / (patch_size*patch_size)) + 1)
         self.pos_embeddings = nn.Parameter(self.create_pos_embeddings(num_positions=num_positions, emb_size=emb_size))
 
     def create_pos_embeddings(self, num_positions, emb_size):
@@ -161,10 +161,11 @@ class ViT(nn.Sequential):
                  img_size:int=224,
                  depth:int=12,
                  out_dim:int=384,
+                 shuffle_patches:bool=True,
                  **kwargs
                 ):
         super(ViT, self).__init__(
-            PatchEmbedding(in_channels, patch_size, emb_size, img_size),
+            PatchEmbedding(in_channels, patch_size, emb_size, img_size, shuffle_patches),
             TransformerEncoder(depth, emb_size=emb_size, **kwargs),
             ProjectionHead(emb_size, out_dim)
         )

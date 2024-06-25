@@ -85,7 +85,6 @@ def train(params:dict)-> None:
         img_size=img_size,
         depth=depth,
         out_dim=out_dim,
-        shuffle_patches=shuffle_patches,
         drop_p=drop_p,
         forward_expansion=forward_expansion,
         forward_drop_p=forward_drop_p,

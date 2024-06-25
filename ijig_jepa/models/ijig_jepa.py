@@ -15,7 +15,6 @@ class IJigJepa(nn.Module):
                  img_size:int=224,
                  depth:int=12,
                  out_dim:int=384,
-                 device:str='cuda',
                  **kwargs
                 ):
         super(IJigJepa, self).__init__()
@@ -27,11 +26,20 @@ class IJigJepa(nn.Module):
             img_size=img_size,
             depth=depth,
             out_dim=out_dim,
+            shuffle_patches=True,
             **kwargs
         )
 
-        self.target_encoder = copy.deepcopy(self.context_encoder)
-        # TODO: shuffle is true for both. It needs to be false for target_encoder
+        self.target_encoder = ViT(
+            in_channels=in_channels,
+            patch_size=patch_size,
+            emb_size=emb_size,
+            img_size=img_size,
+            depth=depth,
+            out_dim=out_dim,
+            shuffle_patches=False,
+            **kwargs
+        )
         
         for p in self.target_encoder.parameters():
             p.requires_grad=False
